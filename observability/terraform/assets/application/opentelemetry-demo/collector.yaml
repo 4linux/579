@@ -1,0 +1,12 @@
+# Sobrepoe somente os exporters/pipeline metrics do Collector da Demo 3.1.0.
+# Este arquivo e adicionado APOS o arquivo principal da Demo.
+exporters:
+  otlphttp/bb:
+    endpoint: http://__OBSERVABILITY_IP__:4318
+    compression: gzip
+    tls:
+      insecure: true
+service:
+  pipelines:
+    metrics:
+      exporters: [debug, otlphttp/bb]

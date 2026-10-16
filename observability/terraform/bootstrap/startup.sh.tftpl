@@ -1,0 +1,36 @@
+#!/bin/bash
+set -euo pipefail
+exec > >(tee -a /var/log/lab-startup.log) 2>&1
+export DEBIAN_FRONTEND=noninteractive
+if [ -f /var/lib/lab-provisioned ]; then echo 'Already provisioned'; exit 0; fi
+apt-get update -y
+apt-get install -y ca-certificates curl gnupg git openssl tar python3
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
+printf 'deb [arch=%s signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian %s stable\n' "$(dpkg --print-architecture)" "$(. /etc/os-release && echo "$VERSION_CODENAME")" > /etc/apt/sources.list.d/docker.list
+apt-get update -y
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+systemctl enable --now docker
+printf '%s' '${archive_b64}' | base64 -d | tar -xz -C /opt/
+if [ '${role}' = 'observability' ]; then
+  sed -i 's/__APPLICATION_IP__/${application_ip}/g' /opt/observability/prometheus/prometheus.yml
+  cd /opt/observability
+  if [ ! -f .env ]; then
+    printf 'GRAFANA_ADMIN_PASSWORD=%s\n' "$(openssl rand -hex 12)" > .env
+    chmod 600 .env
+  fi
+  docker compose up -d --pull always
+else
+  if [ ! -d /opt/application/opentelemetry-demo/upstream/.git ]; then
+    git clone --depth 1 --branch 3.1.0 https://github.com/open-telemetry/opentelemetry-demo.git /opt/application/opentelemetry-demo/upstream
+  fi
+  sed -i 's/^DEMO_VERSION=.*/DEMO_VERSION=3.1.0/' /opt/application/opentelemetry-demo/upstream/.env
+  # Demo envia OTLP ao collector interno e este reexporta ao collector do observability-server.
+  # O arquivo de override e gerado no projeto e aplicado pelo script demo-start.
+  # Prepara endereco do Collector externo dentro da rede privada da GCP.
+  sed -i 's/__OBSERVABILITY_IP__/${observability_ip}/g' /opt/application/opentelemetry-demo/collector.yaml
+  echo 'Aplicacoes preparadas, NAO iniciadas.'
+fi
+touch /var/lib/lab-provisioned
+echo 'Lab bootstrap complete'

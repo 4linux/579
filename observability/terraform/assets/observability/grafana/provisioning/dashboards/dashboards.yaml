@@ -1,0 +1,10 @@
+apiVersion: 1
+providers:
+  - name: bb-otel-demo
+    orgId: 1
+    folder: Banco do Brasil - Aula 13
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 20
+    options:
+      path: /etc/grafana/provisioning/dashboards/json

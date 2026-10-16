@@ -1,0 +1,9 @@
+initial_project_id         = "PROJECT_ID"
+okd_project_id             = "okd4-lab-HASH"
+billing_account            = "BILLING_ACCOUNT_ID"
+region                     = "us-central1"
+zone                       = "us-central1-a"
+release                    = "4.21.0-okd-scos.11"
+create_service_account_key = true
+master_machine_type       = "e2-standard-4"
+console_source_ranges     = ["0.0.0.0/0"]

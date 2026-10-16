@@ -1,0 +1,25 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["prometheus:9090"]
+  - job_name: otel-collector
+    static_configs:
+      - targets: ["otel-collector:9464"]
+  # Ativar conforme a Aula 10, DEPOIS de iniciar os exporters
+  # na application-server e ajustar/firewall conforme o laboratorio.
+  # - job_name: wordpress-apache
+  #   static_configs:
+  #     - targets: ["__APPLICATION_IP__:9117"]
+  # - job_name: mysql
+  #   static_configs:
+  #     - targets: ["__APPLICATION_IP__:9104"]
+  # - job_name: application-node
+  #   static_configs:
+  #     - targets: ["__APPLICATION_IP__:9100"]

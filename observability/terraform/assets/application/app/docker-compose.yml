@@ -1,0 +1,47 @@
+services:
+  db-server:
+    image: "mysql:5.7"
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "Abc123"
+      MYSQL_DATABASE: php
+      MYSQL_USER: php
+      MYSQL_PASSWORD: 4linux
+    ports:
+      - "3306:3306"
+    volumes:
+      - "./sql/:/opt"
+      - "./data:/var/lib/mysql"
+  import-sql:
+    image: "mysql:5.7"
+    restart: unless-stopped
+    depends_on:
+      - "db-server"
+    environment:
+      MYSQL_ROOT_PASSWORD: "Abc123"
+      MYSQL_DATABASE: php
+      MYSQL_USER: php
+      MYSQL_PASSWORD: 4linux
+    volumes:
+      - "./sql/:/opt"
+      - "./data:/var/lib/mysql"
+    entrypoint: ["sh", "-c", "sleep 30 && mysql -h db-server -uroot -pAbc123 < /opt/dump.sql"]
+  web-server:
+    image: "lab4linux/app-4linux:latest"
+    restart: unless-stopped
+    environment:
+      DB_HOST: "db-server"
+      DB_PORT: 3306
+      DB_USER: php
+      DB_PASS: 4linux
+      DB_NAME: php
+    ports:
+     - "80:80"
+    volumes:
+      - "./config/php.ini:/usr/local/etc/php/php.ini"
+      - "./config/server-status.conf:/etc/apache2/conf-enabled/server-status.conf"
+  memcached-server:
+    image: "memcached"
+    restart: unless-stopped
+    ports:
+      - "11211:11211"

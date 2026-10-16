@@ -1,0 +1,10 @@
+# Override de ensino: mantem o collector interno da Demo, adiciona encaminhamento OTLP.
+services:
+  otel-collector:
+    command:
+      - --config=/etc/otelcol-config.yml
+      - --config=/etc/otelcol-config-extras.yml
+      - --config=/etc/otelcol.yml
+      - --feature-gates=service.profilesSupport
+    volumes:
+      - ../collector.yaml:/etc/otelcol.yml:ro
