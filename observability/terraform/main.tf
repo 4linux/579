@@ -1,31 +1,29 @@
 locals {
-  base_labels = { purpose = "bb-observabilidade", owner = "terraform" }
+  base_labels = { purpose = "observabilidade", owner = "terraform" }
 }
-# IP publico regional e estatico para as interfaces de observabilidade.
 resource "google_compute_address" "observability_public" {
-  name   = "bb-observability-static-ip"
+  name   = "observability-static-ip"
   region = var.region
 }
 
-# IP privado fixo usado pela OpenTelemetry Demo para enviar metricas.
 resource "google_compute_address" "observability_private" {
-  name         = "bb-observability-private-ip"
+  name         = "observability-private-ip"
   region       = var.region
   address_type = "INTERNAL"
   subnetwork   = var.subnetwork
 }
 
 resource "google_compute_address" "application_public" {
-  name   = "bb-application-static-ip"
+  name   = "application-static-ip"
   region = var.region
 }
 
 resource "google_compute_firewall" "application_web" {
-  name          = "bb-lab-application-web-public"
+  name          = "lab-application-web-public"
   network       = var.network
   direction     = "INGRESS"
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["bb-application"]
+  target_tags   = ["application"]
 
   allow {
     protocol = "tcp"
@@ -33,14 +31,12 @@ resource "google_compute_firewall" "application_web" {
   }
 }
 
-# Acesso publico solicitado para laboratorio. Prometheus e Alertmanager
-# nao possuem autenticacao neste pacote: NAO usar em producao.
 resource "google_compute_firewall" "observability_web" {
-  name          = "bb-lab-observability-web-public"
+  name          = "lab-observability-web-public"
   network       = var.network
   direction     = "INGRESS"
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["bb-observability"]
+  target_tags   = ["observability"]
 
   allow {
     protocol = "tcp"
@@ -49,33 +45,33 @@ resource "google_compute_firewall" "observability_web" {
 }
 
 resource "google_compute_firewall" "app_exporters" {
-  name          = "bb-lab-app-exporters"
+  name          = "lab-app-exporters"
   network       = var.network
   direction     = "INGRESS"
-  source_tags   = ["bb-observability"]
-  target_tags   = ["bb-application"]
+  source_tags   = ["observability"]
+  target_tags   = ["application"]
   allow {
     protocol = "tcp"
     ports    = ["9100", "9104", "9117"]
   }
 }
 resource "google_compute_firewall" "app_to_otel" {
-  name          = "bb-lab-app-to-otel"
+  name          = "lab-app-to-otel"
   network       = var.network
   direction     = "INGRESS"
-  source_tags   = ["bb-application"]
-  target_tags   = ["bb-observability"]
+  source_tags   = ["application"]
+  target_tags   = ["observability"]
   allow {
     protocol = "tcp"
     ports    = ["4317", "4318"]
   }
 }
 resource "google_compute_firewall" "iap_ssh" {
-  name          = "bb-lab-iap-ssh"
+  name          = "lab-iap-ssh"
   network       = var.network
   direction     = "INGRESS"
   source_ranges = ["35.235.240.0/20"]
-  target_tags   = ["bb-observability", "bb-application"]
+  target_tags   = ["observability", "application"]
   allow {
     protocol = "tcp"
     ports    = ["22"]
@@ -85,7 +81,7 @@ resource "google_compute_instance" "application" {
   name         = "application-server"
   machine_type = "e2-standard-4"
   zone         = var.zone
-  tags         = ["bb-application"]
+  tags         = ["application"]
   labels       = local.base_labels
   boot_disk {
     initialize_params {
@@ -114,7 +110,7 @@ resource "google_compute_instance" "observability" {
   name         = "observability-server"
   machine_type = "e2-standard-2"
   zone         = var.zone
-  tags         = ["bb-observability"]
+  tags         = ["observability"]
   labels       = local.base_labels
   boot_disk {
     initialize_params {
