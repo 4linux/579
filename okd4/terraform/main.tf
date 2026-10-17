@@ -198,11 +198,38 @@ resource "google_compute_instance" "bastion" {
       type  = "pd-balanced"
     }
   }
+  metadata = {
+    enable-oslogin = "TRUE"
+
+    startup-script = <<-EOF
+      #!/bin/bash
+      set -e
+
+      # Atualiza a lista de pacotes e instala o NFS
+      apt-get update
+      DEBIAN_FRONTEND=noninteractive apt-get install -y nfs-kernel-server
+
+      # Cria o diretório de compartilhamento
+      mkdir -p /nfs
+      chown nobody:nogroup /nfs
+      chmod 755 /nfs
+
+      # Configura o compartilhamento NFS
+      echo '/nfs *(rw,sync,no_subtree_check,no_root_squash)' > /etc/exports.d/okd.exports
+
+      # Aplica as configurações
+      exportfs -ra
+
+      # Habilita e inicia o servidor NFS
+      systemctl enable nfs-kernel-server
+      systemctl restart nfs-kernel-server
+    EOF
+  }
+
   network_interface {
     subnetwork = google_compute_subnetwork.infra.id
     access_config { nat_ip = google_compute_address.bastion.address }
   }
-  metadata = { enable-oslogin = "TRUE" }
   service_account { scopes = ["cloud-platform"] }
   depends_on = [google_compute_router_nat.infra, google_compute_network_peering.infra_to_okd, google_compute_network_peering.okd_to_infra, google_dns_managed_zone.lab, google_service_account_iam_member.bastion_key_creator, google_project_iam_member.installer]
 }
