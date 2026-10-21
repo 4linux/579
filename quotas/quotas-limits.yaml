@@ -5,7 +5,7 @@ metadata:
   name: quota-limits
 spec:
   hard:
-    requests.cpu: "1.5"
-    requests.memory: 768Mi
-    limits.cpu: "2.8"
-    limits.memory: 2000Mi
+    requests.cpu: "4"
+    requests.memory: 2Gi
+    limits.cpu: "8"
+    limits.memory: 4Gi
