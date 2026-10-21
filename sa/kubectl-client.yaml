@@ -7,5 +7,5 @@ spec:
   serviceAccountName: operator
   containers:
     - name: kubectl-container
-      image: dhi.io/kubectl:1.35
+      image: lachlanevenson/k8s-kubectl:v1.22.16
       command: ["sleep", "86400"]
