@@ -1,0 +1,27 @@
+metrics:
+  receivers:
+    mysql:
+      type: mysql
+      endpoint: localhost:3306
+      username: root
+      password: Abc123
+
+    apache:
+      type: apache
+
+    memcached:
+      type: memcached
+
+  service:
+    pipelines:
+      mysql:
+        receivers:
+          - mysql
+
+      apache:
+        receivers:
+          - apache
+
+      memcached:
+        receivers:
+          - memcached
