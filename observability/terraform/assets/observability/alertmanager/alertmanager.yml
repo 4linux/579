@@ -1,8 +1,12 @@
 global:
-  resolve_timeout: 5m
+  resolve_timeout: 1m
+
 route:
-  receiver: null-receiver
-  group_by: [alertname, job]
+  receiver: 'slack-notifications'
+
 receivers:
-  - name: null-receiver
-# Aula 12: configurar receiver real (ex. Teams) de acordo com o ambiente.
+  - name: 'slack-notifications'
+    slack_configs:
+    - api_url: 'COLE_AQUI_O_Webhook_URL_DO_SLACK'
+      channel: '#prometheus-notifications'
+      send_resolved: true

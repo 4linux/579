@@ -1,0 +1,57 @@
+metrics:
+  receivers:
+    mysql:
+      type: mysql
+      endpoint: localhost:3306
+      username: root
+      password: Abc123
+
+    apache:
+      type: apache
+
+    memcached:
+      type: memcached
+
+  service:
+    pipelines:
+      mysql:
+        receivers:
+          - mysql
+
+      apache:
+        receivers:
+          - apache
+
+      memcached:
+        receivers:
+          - memcached
+
+logging:
+  receivers:
+    mysql_error:
+      type: mysql_error
+
+    mysql_general:
+      type: mysql_general
+
+    mysql_slow:
+      type: mysql_slow
+
+    apache_access:
+      type: apache_access
+
+    apache_error:
+      type: apache_error
+
+  service:
+    pipelines:
+      mysql:
+        receivers:
+          - mysql_error
+          - mysql_general
+          - mysql_slow
+
+      apache:
+        receivers:
+          - apache_access
+          - apache_error

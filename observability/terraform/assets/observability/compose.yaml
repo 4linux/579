@@ -4,7 +4,7 @@ services:
     command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--storage.tsdb.retention.time=3d"]
     ports: ["0.0.0.0:9090:9090"]
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus:/etc/prometheus:ro
       - prom-data:/prometheus
     restart: unless-stopped
     mem_limit: 1536m

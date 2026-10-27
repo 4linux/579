@@ -1,0 +1,35 @@
+groups:
+- name: Nodes
+  rules:
+  - alert: InstanceDown
+    expr: up == 0
+    for: 1m
+    labels:
+      severity: page
+    annotations:
+      summary: "Instância {{ $labels.instance }} está inativa"
+      description: "{{ $labels.instance }} não está respondendo há mais de 1 minuto."
+  - alert: HighCPUUsage
+    expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[1m])) * 100) > 50
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Uso elevado de CPU na instância {{ $labels.instance }}"
+      description: "A instância {{ $labels.instance }} está com uso de CPU acima de 50%."
+  - alert: HostOutOfMemory
+    expr: node_memory_MemAvailable / node_memory_MemTotal * 100 < 20
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host sem memória (instance {{ $labels.instance }})"
+      description: "A memória do nó está cheia (< 20% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+  - alert: HostOutOfDiskSpace
+    expr: (node_filesystem_avail{mountpoint="/"}  * 100) / node_filesystem_size{mountpoint="/"} < 20
+    for: 1s
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host sem espaço em disco (instance {{ $labels.instance }})"
+      description: "O disco está quase cheio (< 20% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
